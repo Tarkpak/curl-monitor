@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curl Monitor</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/i18n.js"></script>
+  <script src="/components/notify-config.js" type="module"></script>
+  <script src="/components/add-monitor.js" type="module"></script>
+  <script src="/components/monitor-table.js" type="module"></script>
+  <script src="/components/monitor-drawer.js" type="module"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div class="max-w-6xl mx-auto py-8 px-4">
+    <div class="flex justify-between items-center mb-6">
+      <h1 id="pageTitle" class="text-2xl font-bold text-gray-800"></h1>
+      <div class="flex gap-2">
+        <button id="configBtn" class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm"></button>
+        <button id="addBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm"></button>
+      </div>
+    </div>
+
+    <!-- 监控列表 -->
+    <monitor-table id="monitorTable"></monitor-table>
+  </div>
+
+  <!-- 弹窗组件 -->
+  <notify-config id="notifyConfig"></notify-config>
+  <add-monitor id="addMonitor"></add-monitor>
+  <monitor-drawer id="drawer"></monitor-drawer>
+
+  <script>
+    const { t } = window.i18n;
+    
+    // 更新页面文本
+    function updatePageText() {
+      document.getElementById('pageTitle').textContent = t('pageTitle');
+      document.getElementById('configBtn').textContent = t('config');
+      document.getElementById('addBtn').textContent = t('addMonitor');
+      document.title = t('pageTitle');
+    }
+    updatePageText();
+    
+    // 监听语言变化
+    document.addEventListener('language-changed', updatePageText);
+
+    const configBtn = document.getElementById('configBtn');
+    const addBtn = document.getElementById('addBtn');
+    const notifyConfig = document.getElementById('notifyConfig');
+    const addMonitor = document.getElementById('addMonitor');
+    const monitorTable = document.getElementById('monitorTable');
+    const drawer = document.getElementById('drawer');
+
+    // 配置按钮 - 打开配置弹窗
+    configBtn.onclick = () => notifyConfig.open();
+
+    // 配置加载完成后更新添加弹窗的通知选项
+    notifyConfig.addEventListener('config-loaded', (e) => {
+      const options = e.detail.notifyUrls.map(n => ({ id: n.id, name: n.name }));
+      addMonitor.notifyOptions = options;
+    });
+
+    // 添加/编辑成功后刷新列表
+    addMonitor.addEventListener('saved', () => {
+      monitorTable.loadData();
+    });
+
+    // 点击编辑按钮
+    monitorTable.addEventListener('edit-click', (e) => {
+      addMonitor.open(e.detail);
+    });
+
+    // 表格数据加载完成
+    monitorTable.addEventListener('data-loaded', (e) => {
+      drawer.allData = e.detail;
+    });
+
+    // 点击表格行打开抽屉
+    monitorTable.addEventListener('row-click', (e) => {
+      drawer.open(e.detail);
+    });
+
+    // 等待组件加载完成后初始化
+    customElements.whenDefined('notify-config').then(() => {
+      notifyConfig.loadConfig();
+    });
+    
+    // 打开添加弹窗前确保配置已加载
+    addBtn.onclick = async () => {
+      await notifyConfig.loadConfig();
+      addMonitor.open();
+    };
+  </script>
+</body>
+</html>

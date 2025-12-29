@@ -1,0 +1,22 @@
+{
+  "notifyUrls": [
+    {
+      "id": "1",
+      "name": "我",
+      "type": "bark",
+      "server": "https://api.day.app",
+      "key": "MEpXBFEed5N5qDu2UHJdWY",
+      "title": "内容变更通知",
+      "body": "监控检测到内容变化",
+      "sound": "default",
+      "level": "active",
+      "group": "",
+      "icon": "",
+      "badge": "",
+      "isArchive": true,
+      "autoCopy": false,
+      "call": false,
+      "url": ""
+    }
+  ]
+}
